@@ -16,7 +16,6 @@ const fs = require("fs");
 
 //Uuidv4 is to generate a new ID
 const { v4: uuidv4 } = require('uuid');
-uuidv4(); //YS: Why are you calling it here? 
 
 //Joi is to validate the data I enter:
 const Joi = require("joi");
@@ -30,7 +29,7 @@ function readJsonAllTasks() {
         const tasksList = fs.readFileSync("./allTasks.json");
         return JSON.parse(tasksList);
     } catch (error) {
-        console.error(error);
+        res.status(500).send(error.message);
     }
 }
 
@@ -42,7 +41,7 @@ app.post('/createTask', (req, res) => {
             taskTitle: Joi.string().max(40).required(),
             taskDescription: Joi.string().max(200).required(),
         });
-        const { error, value } = schema.validate({   //YS: Very nice
+        const { error, value } = schema.validate({
             taskTitle: body.taskTitle,
             taskDescription: body.taskDescription,
         });
@@ -59,11 +58,11 @@ app.post('/createTask', (req, res) => {
             fs.writeFileSync("./allTasks.json", JSON.stringify(allTasks));
             res.send({ message: 'A new Task was added', tasks: allTasks });
         } else {
-            const msg = error.details[0].message; 
-            res.status(400).send(msg); 
-        } 
+            const msg = error.details[0].message;
+            res.status(400).send(msg);
+        }
     } catch (error) {
-        console.error(error); //YS: Good! This should be res.status(500).send(error.message)
+        res.status(500).send(error.message);
     };
 });
 
@@ -73,7 +72,7 @@ app.get('/getAllTasks', (req, res) => {
         const allTasks = readJsonAllTasks();
         res.send(allTasks);
     } catch (error) {
-        console.error(error); //YS: Not console log! res.status(400/500).send(error.message)
+        res.status(500).send(error.message);
     }
 });
 
@@ -86,7 +85,7 @@ app.delete('/deleteTask/:id', (req, res) => {
         fs.writeFileSync("./allTasks.json", JSON.stringify(allTasks));
         res.send(({ message: 'A task was deleted', tasks: allTasks }));
     } catch (e) {
-        res.status(400).send(error); //YS: error.message
+        res.status(400).send(error.message);
     }
 });
 
@@ -96,7 +95,7 @@ app.put('/editTask/:id', (req, res) => {
         const { taskTitle, taskDescription, taskStatus } = req.body;
         const { id } = req.params;
         let allTasks = readJsonAllTasks();
-        const taskIndex = allTasks.findIndex(task => task.id === id); //YS: Why not use find?
+        const taskIndex = allTasks.findIndex(task => task.id === id);
         if (taskIndex > -1) {
             allTasks[taskIndex].title = taskTitle;
             allTasks[taskIndex].description = taskDescription;
@@ -104,7 +103,7 @@ app.put('/editTask/:id', (req, res) => {
             fs.writeFileSync("./allTasks.json", JSON.stringify(allTasks));
             res.send({ message: 'A task was updated', tasks: allTasks })
         } else {
-            res.send({ message: 'Couldnt find a task to update', tasks: allTasks })  //YS: res.status(400).send....
+            rest.status(400).send({ message: 'Couldnt find a task to update', tasks: allTasks });
         }
     } catch (e) {
         res.status(400).send(error);
@@ -116,7 +115,7 @@ app.put('/editStatusTask/:id/:status', (req, res) => {
     try {
         const { id, status } = req.params;
         let allTasks = readJsonAllTasks();
-        const taskIndex = allTasks.findIndex(task => task.id === id); //YS: Why not use find?
+        const taskIndex = allTasks.findIndex(task => task.id === id);
         if (taskIndex > -1) {
             allTasks[taskIndex].status = status;
             fs.writeFileSync("./allTasks.json", JSON.stringify(allTasks));
@@ -125,7 +124,7 @@ app.put('/editStatusTask/:id/:status', (req, res) => {
             res.send({ message: 'Couldnt find a task to update', tasks: allTasks })
         }
     } catch (e) {
-        res.status(400).send(error); //YS: error.message
+        res.status(400).send(error.message);
     }
 });
 
@@ -134,6 +133,6 @@ app.listen(port, () => {
     try {
         console.log(`The server is running at port:${port}`)
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send(error.message);
     }
 });

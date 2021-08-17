@@ -49,7 +49,7 @@ function renderThrough(data, status) {
             if (task.status === status) {
                 let taskDateCreated = readableDate(task.dateCreated);
                 return `<div class='tasks ${status}' id='${task.id}' draggable="true" ondragstart="onDragStart(event)">
-                    <button class="tasks__edit" id='${task.id}name' onclick=uploadTask("${task.id}")>
+                    <button class="tasks__edit" id='${task.id}name' onclick=updateTask("${task.id}")>
                         <h4> ${task.title} </h4>             
                         <p> ${task.description} </p>
                     </button>
@@ -67,7 +67,7 @@ function renderThrough(data, status) {
 };
 
 //This function is to edit the format for the Date that Im going to show in the DOM
-function readableDate(date) { //YS: Nice! There is a library called moment which does this for you. 
+function readableDate(date) {
     try {
         const today = new Date(date);
         const options = { day: 'numeric', month: 'numeric', year: '2-digit' };
@@ -104,7 +104,7 @@ async function deleteTask(id) {
 //This will contain the Task ID to Edit
 let taskIdEdit = ''; //YS: You can just do: let taskIdEdit;
 
-async function uploadTask(id) { //YS: Nice! Thought it should be called updateTask
+async function updateTask(id) {
     try {
         if (!modalEdit) throw new Error('There is a problem finding modalEdit from HTML');
         modalEdit.style.display = "block";
@@ -146,7 +146,7 @@ async function uploadTask(id) { //YS: Nice! Thought it should be called updateTa
             }
         }).join('');
         formEdit.innerHTML = html;
-        taskIdEdit = id; //YS: Nice
+        taskIdEdit = id;
     } catch (error) {
         console.error(error);
     };
